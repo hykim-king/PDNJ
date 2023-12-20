@@ -1,0 +1,41 @@
+@charset "UTF-8";
+
+    table, th, td {
+        border: 1px solid #ccc;
+        border-collapse: collapse;
+    }
+    
+    th, td {
+        padding: 10px 20px;
+    }
+    
+    /* 정렬 */
+    .txt-left {
+        text-align: left;
+    }
+    .txt-center {
+        text-align: center;
+    }
+    .txt-right {
+        text-align: right;
+    }
+    
+    .select {
+        height: 30px;
+        vertical-align: middle;
+        font-size: 12px;
+    }
+    
+    .btn {
+        height: 30px;
+        vertical-align: middle;
+        font-size:12px;
+        background-color:skyblue;
+        color:#ffffff;
+    }
+    
+    .input {
+        height: 26.5px;
+        vertical-align: middle;
+        font-size: 12px;
+    }

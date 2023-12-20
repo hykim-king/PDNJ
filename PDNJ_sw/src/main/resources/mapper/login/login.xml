@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pcwk.ehr.login">
+	<!-- idCheck -->
+	<select id="idCheck" parameterType="UserVO" resultType="int">
+	    SELECT
+            COUNT(*) cnt
+        FROM
+            member
+        WHERE user_id = #{userId}
+	</select>
+	
+	<!-- idPassCheck -->
+	<select id="idPassCheck" parameterType="UserVO" resultType="int">
+        SELECT
+            COUNT(*) cnt
+        FROM
+            member
+        WHERE user_id = #{userId}
+        AND   password = #{password}
+    </select>
+	
+	<!-- login -->
+	<select id="doSelectOne" parameterType="UserVO" resultType="UserVO">
+        SELECT           
+             user_id AS userId,     
+             password,    
+             username,    
+             email,       
+             user_tel AS userTel     
+         FROM             
+             member       
+         WHERE user_id = #{userId}
+    </select>
+</mapper>

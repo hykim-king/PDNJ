@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- Dao: query 찾는 분류 기준 namespace+id -> com.pcwk.ehr.anno.doSelectOne -->
+<mapper namespace="com.pcwk.ehr.post">
+    <sql id="searchCondition">
+        <where>
+            <choose>
+               <when test="searchDiv != null and searchDiv == '10'">
+                    user_id = #{searchWord}
+               </when>
+               <when test="searchDiv != null and searchDiv == '20'">
+                    name LIKE #{searchWord} ||'%'
+               </when>
+               <when test="searchDiv != null and searchDiv == '30'">
+                    email LIKE #{searchWord} ||'%'
+               </when>
+            </choose>
+        </where>
+    </sql>
+    <select id="doRetrieve" parameterType="PostVO" resultType="PostVO">
+        SELECT A.*,B.*
+        FROM(
+            SELECT TT1.rnum AS no,
+                   TT1.post_id,
+                   TT1.title,
+                   TT1.post_content,
+                   DECODE( TO_CHAR(TT1.post_date,'YYYY-MM-DD'), TO_CHAR(SYSDATE,'YYYY-MM-DD'),
+                           TO_CHAR(TT1.post_date,'HH24:MI'), TO_CHAR(TT1.post_date,'YYYY-MM-DD')) AS post_date,
+                   TT1.user_id
+            FROM (
+                SELECT ROWNUM AS rnum, T1.*
+                FROM (SELECT *
+                      FROM post
+                      --WHERE조건 post_id(10), post_date(20), user_id(30),
+                      <include refid="searchCondition"></include>
+                      ORDER BY post_date desc
+                )T1
+            <![CDATA[
+                WHERE ROWNUM <= ( #{pageSize} * (#{pageNo} -1) + #{pageSize})
+            )TT1
+            WHERE rnum >= ( #{pageSize} * (#{pageNo} -1) +1)
+            ]]>
+        )A
+        CROSS JOIN
+        (
+            SELECT COUNT(*) total_cnt
+            FROM post
+            --WHERE조건
+            <include refid="searchCondition"></include>
+        )B
+    </select>
+    <resultMap type="PostVO" id="userMap">
+        <result column="post_id" property="postId"/>
+        <result column="title" property="title"/>
+        <result column="post_content" property="postContent"/>
+        <result column="post_date" property="postDate"/>
+        <result column="user_id" property="userId"/>
+    </resultMap>
+    <select id="getAll" parameterType="PostVO" resultMap="userMap">
+        SELECT  t1.post_id,
+                t1.title,
+                t1.post_content,
+                t1.post_date,
+                t1.user_id
+        FROM
+            post t1
+        WHERE post_id = #{postId}
+        ORDER BY t1.post_id
+    </select>
+    <select id="getNextval" parameterType="com.pcwk.ehr.user.dao.PostDaoImpl"
+            resultType="int">
+        SELECT POST_SEQ.NEXTVAL as seq
+        FROM dual
+    </select>
+    <select id="getCount" parameterType="PostVO"
+            resultType="int">
+         SELECT
+             COUNT(*) cnt
+         FROM
+             post
+         WHERE post_id LIKE #{postId}||'%'
+    </select>
+    <update id="doUpdate" parameterType="PostVO">
+        UPDATE post
+        SET
+            title        = #{title},
+            post_content = #{postContent},
+            post_date    = sysdate,
+            user_id      = #{userId}
+        WHERE
+            post_id = #{postId}
+    </update>
+    <select id="doSelectOne" parameterType="PostVO"
+        resultType="PostVO">
+         SELECT
+            post_id AS postId,
+            title  ,
+            post_content AS postContent,
+            post_date AS postDate,
+            user_id AS userId
+        FROM
+            post
+        where post_id = #{postId}
+    </select>
+    <insert id="doSave" parameterType="PostVO">
+        INSERT INTO post  (
+            post_id,
+            title,
+            post_content,
+            post_date,
+            user_id
+        ) VALUES (
+            POST_SEQ.NEXTVAL,
+            #{title},
+            #{postContent},
+            SYSDATE,
+            #{userId}
+        )
+    </insert>
+    <delete id="doDelete" parameterType="PostVO">
+        DELETE FROM post
+        WHERE post_id = #{postId}
+    </delete>
+</mapper>
